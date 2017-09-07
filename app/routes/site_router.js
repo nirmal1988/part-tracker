@@ -21,13 +21,25 @@ var ibc_parts = {};
 var chaincode_parts = {};
 
 var async = require("async");
+var winston = require('winston');								//logger module
+var path = require('path');
+var enrollObj = null;
+var logger = new (winston.Logger)({
+	level: 'debug',
+	transports: [
+		new (winston.transports.Console)({ colorize: true }),
+	]
+});
+
+var helper = require(path.join(__dirname, '../utils/helper.js'))(process.env.creds_filename, logger);
+var fcw = require('../utils/fc_wrangler/index.js')({ block_delay: helper.getBlockDelay() }, logger);		//fabric client wrangler wraps the SDK
 
 // Load our modules.
 //var aux     = require("./site_aux.js");
 
 var creds	= require("../user_creds.json");
-
-
+var wsInteraction = require('../utils/wsInteraction.js');
+enrollUser();
 // ============================================================================================================================
 // Home
 // ============================================================================================================================
@@ -66,18 +78,11 @@ router.route("/getPart").post(function(req, res){
 	})
 });
 
-
-router.route("/getAllParts").post(function(req, res){
-
-	chaincode.query.getAllParts([req.body.user], function (e, resMsg){
-		if(e != null){
-			console.log("Get All Part error", e);
-			res.send(e);
-		}
-		else{
-			res.send(resMsg);
-		}
-	})
+router.route("/getAllParts").get(function(req, res){
+	var promise = wsInteraction.getAllParts();
+	promise.then(function(resp,err){
+		res.send(resp);
+	});	
 });
 
 router.route("/login").get(function(req, res){
@@ -145,3 +150,12 @@ module.exports.setupParts = function(sdk, cc){
 	chaincode_parts = cc;
 };
 
+function enrollUser(){
+	fcw.enroll(helper.makeEnrollmentOptions(0), function (errCode, obj) {
+		if (errCode != null) {
+			logger.error('could not enroll...');
+		} else {
+			enrollObj = obj;			
+		}
+	});
+}

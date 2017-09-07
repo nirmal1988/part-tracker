@@ -49,10 +49,39 @@ module.exports.setupParts = function(sdk, cc){
 	chaincode_parts = cc;
 };
 
+module.exports.getAllParts = function(){
+	var options = {
+		peer_urls: [helper.getPeersUrl(first_peer)],		
+		endorsed_hook: endorse_hook,
+		ordered_hook: orderer_hook
+	};
+	return new Promise(
+        function (resolve, reject) {
+			app_cc_lib.getAllParts(options, function (err, resp) {
+				if (err != null) reject(err);
+				else {
+					resolve({parts: resp.parsed.parts});
+				}
+			});			
+		});
+};
+
+// endorsement stage callback
+function endorse_hook(err) {
+	if (err) sendMsg({ msg: 'tx_step', state: 'endorsing_failed' });
+	else sendMsg({ msg: 'tx_step', state: 'ordering' });
+}
+
+// ordering stage callback
+function orderer_hook(err) {
+	if (err) sendMsg({ msg: 'tx_step', state: 'ordering_failed' });
+	else sendMsg({ msg: 'tx_step', state: 'committing' });
+}
+
+const channel = helper.getChannelId();
+const first_peer = helper.getFirstPeerName(channel);
+
 module.exports.process_msg = function(ws, data, owner){
-	const channel = helper.getChannelId();
-	const first_peer = helper.getFirstPeerName(channel);
-	
 	var options = {
 		peer_urls: [helper.getPeersUrl(first_peer)],
 		ws: ws,
@@ -206,16 +235,17 @@ module.exports.process_msg = function(ws, data, owner){
 	}
 
 	// endorsement stage callback
-	function endorse_hook(err) {
-		if (err) sendMsg({ msg: 'tx_step', state: 'endorsing_failed' });
-		else sendMsg({ msg: 'tx_step', state: 'ordering' });
-	}
+function endorse_hook(err) {
+	if (err) sendMsg({ msg: 'tx_step', state: 'endorsing_failed' });
+	else sendMsg({ msg: 'tx_step', state: 'ordering' });
+}
 
-	// ordering stage callback
-	function orderer_hook(err) {
-		if (err) sendMsg({ msg: 'tx_step', state: 'ordering_failed' });
-		else sendMsg({ msg: 'tx_step', state: 'committing' });
-	}
+// ordering stage callback
+function orderer_hook(err) {
+	if (err) sendMsg({ msg: 'tx_step', state: 'ordering_failed' });
+	else sendMsg({ msg: 'tx_step', state: 'committing' });
+}
+	
 	var blockHistoryHeight = 0;
 	function cb_chainstats (err, resp) {
 		var newBlock = false;
