@@ -49,6 +49,7 @@ module.exports.setupParts = function(sdk, cc){
 	chaincode_parts = cc;
 };
 
+
 module.exports.getAllParts = function(){
 	var options = {
 		peer_urls: [helper.getPeersUrl(first_peer)],		
