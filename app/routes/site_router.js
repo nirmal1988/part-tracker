@@ -78,6 +78,7 @@ router.route("/getPart").post(function(req, res){
 	})
 });
 
+
 router.route("/getAllParts").get(function(req, res){
 	var promise = wsInteraction.getAllParts();
 	promise.then(function(resp,err){
