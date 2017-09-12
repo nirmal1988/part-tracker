@@ -21,6 +21,138 @@ var panels = [
 	}
 ];
 var lastTx = ''
+var partTypes = [
+	"Air Intake Parts",
+	"Body Exterior Parts",
+	"Body Interior Parts",
+	"Brake Parts",
+	"Climate Control Parts",
+	"Clutch Parts",
+	"Cooling System Parts",
+	"Drive Belts Parts",
+	"Driveshaft and Axle Parts",
+	"Engine Electrical Parts",
+	"Engine Mechanical Parts",
+	"Exhaust Parts",
+	"Fuel System Parts",
+	"Steering Parts",
+	"Suspension Parts",
+	"Transmission Parts",
+	"Performance Parts Parts",
+	"Manuals and Accessories Parts",
+	"Chemicals and Fluids Parts",
+	"Tools and Hardware Parts",
+	"Maintenance Parts"
+];
+
+var partNames = {
+	"Air Intake Parts": [
+		"BMW Secondary Air Pump Kit (540i)",
+		"BMW Turbocharger Installation Kit",
+		"BMW Mass Air Flow Sensor - Bosch"
+	],
+	"Body Exterior Parts": [
+		"BMW Lug Bolt Kit (Set of 20)",
+		"BMW Black Chrome Fender Grille Set",
+		"BMW Tail Light Repair Kit"
+	],
+	"Body Interior Parts": [
+		"BMW Ambient Temperature Sensor Repair Kit",
+		"BMW Carbon Fiber Interior Trim Kit",
+		"BMW Speed Sensor - Bosch"
+	],
+	"Brake Parts": [
+		"BMW Brake Kit - Brembo/Akebono",
+		"BMW Brake Kit - Zimmermann/Textar",
+		"BMW Brake Kit with Lines - Akebono/Brembo"
+	],
+	"Climate Control Parts": [
+		"BMW A/C Compressor - Denso",
+		"BMW Blower Motor Resistor (E38) - Rein",
+		"BMW Heater Hose (E30) - OEM Rein"
+	],
+	"Clutch Parts": [
+		"BMW Clutch Installation Kit",
+		"BMW Dual Mass Flywheel - LuK",
+		"BMW Bell Housing Bolt Set - OEM Rein"
+	],
+	"Cooling System Parts": [
+		"BMW Water Pump Replacement Kit",
+		"BMW E46 Cooling System Overhaul Kit",
+		"BMW Coolant Hose Kit (E38 750iL)"
+	],
+	"Drive Belts Parts": [
+		"BMW Accessory Drive Belt Kit",
+		"BMW A/C Drive Belt Kit",
+		"BMW Belt Tensioner (X5) - INA"
+	],
+	"Driveshaft and Axle Parts": [
+		"BMW Drive Shaft Flex Joint Kit",
+		"BMW Wheel Hub Assembly Front - FAG",
+		"BMW Wheel Bearing Rear - FAG"
+	],
+	"Engine Electrical Parts": [
+		"BMW Ignition Coil Kit (Set of 8) - Bosch",
+		"BMW Spark Plug Kit (Set of 10)",
+		"MW Ignition Coil Kit (Set of 6)"
+	],
+	"Engine Mechanical Parts": [
+		"BMW Cold Climate PCV Breather System Kit",
+		"BMW Standard PCV Breather System Kit",
+		"BMW M52TU/M54 Timing Chain Kit"
+	],
+	"Exhaust Parts": [
+		"BMW Exhaust Clamp (525i) - Rein",
+		"BMW Muffler Front - Eberspaecher",
+		"BMW Exhaust Muffler (Z3 E36) - Bosal"
+	],
+	"Fuel System Parts": [
+		"BMW Fuel Injector Kit (Set of 8) - Genuine BMW",
+		"BMW Idle Control Valve - Bosch",
+		"BMW Fuel Pump and Sender Assembly - VDO"
+	],
+	"Steering Parts": [
+		"BMW Power Steering Reservoir Kit",
+		"BMW Steering Center Link Kit (E39)",
+		"BMW Tie Rod Assembly Kit - Karlyn"
+	],
+	"Suspension Parts": [
+		"BMW 10-Piece Control Arm Kit (E90 E91 E92) - Lemforder",
+		"BMW Strut Assembly Kit - Sachs",
+		"BMW Shock Absorber Kit - 310053KT"
+	],
+	"Transmission Parts": [
+		"BMW Transfer Case Mount Kit (E83 E84) - Corteco",
+		"BMW Manual Trans Short Shift Kit (E30)",
+		"BMW Pinion Shaft Seal Kit"
+	],
+	"Performance Parts Parts": [
+		"BMW FX100 Clutch Kit - Clutch Masters 03040-HD00-D",
+		"BMW Performance Intercooler (Black) - Mishimoto MMINT-E90-07B",
+		"BMW Dual Kompact BOV Kit - Turbosmart TS-0203-1050"
+	],
+	"Manuals and Accessories Parts": [
+		"Hella 3 LED Daytime Running Light Kit",
+		"Haynes Repair Manual ( '78-'85) - Haynes HAY-10215",
+		"BMW Haynes Repair Manual (320i) - Haynes HAY-18025"
+	],
+	"Chemicals and Fluids Parts": [
+		"Automotive Hand Soap (Kit of 10)",
+		"Sylvania Headlight Restoration Kit",
+		"Silicone Gasket Maker (Chemical Sealant) - Reinsozil-t"
+	],
+	"Tools and Hardware Parts": [
+		"Light Bulb (S40 V70 V40) - Osram",
+		"BMW Crush Washer - Reinz",
+		"BMW M60 M62 Timing Tool Kit - CTA",
+		"Power Fluid Extractor and Evacuator - CTA"
+	],
+	"Maintenance Parts": [
+		"BMW Ignition Service KitT",
+		"BMW Oil Change Kit - Genuine BMW/Mahle",
+		"BMW Tune-Up Kit with Oil (740i 740iL)"
+	]	
+};
 
 // =================================================================================
 // On Load
@@ -70,6 +202,25 @@ $(document).on('ready', function() {
 
 	}
 
+	$("#allPartTypes").empty().append('<option id=""></option>')
+	for(var i in partTypes){
+		$("#allPartTypes").append('<option id="'+ partTypes[i] +'">'+ partTypes[i] +'</option>');
+	}
+	$("#allPartTypes").change();
+
+	$("#allPartTypes").change(function(){
+		console.log('allPartTypes dropdown change');
+
+		var $partNamesDropdown = $('#allPartNames');
+		$partNamesDropdown.html('');
+		var partType = $(this).val();
+		selectedPartNames = partNames[partType] || [];
+        
+        var html = $.map(selectedPartNames, function(item){
+            return '<option value="' + item + '">' + item + '</option>'
+        }).join('');
+		$partNamesDropdown.html(html);
+    });
 	// =================================================================================
 	// jQuery UI Events
 	// =================================================================================
@@ -90,8 +241,11 @@ $(document).on('ready', function() {
 							type: "createPart",
 							part: {
 								partId: $("input[name='PartId']").val(),
-								productCode: $("input[name='ProductCode']").val(),
-								dateOfManufacture: $("input[name='DateOfManufacture']").val()
+								partCode: $("input[name='PartCode']").val(),
+								dateOfManufacture: $("input[name='DateOfManufacture']").val(),
+								partType: $('#allPartTypes').val(),
+								partName: $("#allPartNames").val(),
+								description: $("#partDescription").val()
 							}
 						};
 
@@ -106,7 +260,7 @@ $(document).on('ready', function() {
 					$('#tagWrapper').hide();
 					//$("#batchTagPanel").show();
 					$("input[name='PartId']").val('');
-					$("input[name='ProductCode']").val(''),
+					$("input[name='PartCode']").val(''),
 					$("input[name='DateOfManufacture']").val('')
 					//$("#submit").prop('disabled', true);
 				} else {
@@ -137,7 +291,8 @@ $(document).on('ready', function() {
 								dateOfInstallation: $("input[name='DateOfInstallation']").val(),
 								warrantyStartDate: $("input[name='WarrantyStartDate']").val(),
 								warrantyEndDate: $("input[name='WarrantyEndDate']").val(),
-								tranType: tranType
+								tranType: tranType,
+								vin: ""
 							}
 						};
 			console.log('obj.part :'+obj.part+' obj.part.partId:'+obj.part.partId);
@@ -332,19 +487,21 @@ function connect_to_server(){
 				$("#batchDetailsTable").show();
 				for(var i=0; i<txs.length; i++){
 					console.log("Trnsaction "+i+" "+txs[i]);
-					$("#bDetHeader").html("PART #" + data.part.partId + ' - <span style="font-size:16px;font-weight:500">' + data.part.productCode + '</span>');
+					$("#bDetHeader").html("<p>PART Id: " + data.part.partId + "(" + data.part.partName + ")</p>");
 
 
 					if(txs[i].ttype == "CREATE"){
 			          //litem = {avatar:"ion-ios-box-outline", date: tx.vDate, location: tx.location, desc:"ADDED BY ", owner:tx.owner};
 				        html += '<tr>';
-						html +=	'<td>';
-						html +=	'<div style="font-size: 34px;color:#5596E6;float:right;"><i class="icon ion-ios-box-outline"></i></div>';
-						html += '</td>';
 						html += '<td style="text-align:left;padding-left:20px">';
 						html +=	'<div style="display: inline-block; vertical-align: middle;">';
 						html += '<p style="font-weight:500;">ADDED BY <span style="color:#5596E6">' + txs[i].user +'</span></p>';
 						html += '<p style="">on ' + txs[i].dateOfManufacture +'</p>';
+						html += '<p style="">Part Code: ' + data.part.partCode +'</p>';
+						html += '<p style="">Part Type: ' + data.part.partType +'</p>';
+						html += '<p style="">Part Name: ' + data.part.partName +'</p>';
+						html += '<p style="">Description: ' + data.part.description +'</p>';
+						
 						html +=	'</div>';
 						html += '</td>';
 						html += '</tr>';
@@ -352,9 +509,6 @@ function connect_to_server(){
 			        else if(txs[i].ttype == "DELIVERY"){
 			          //litem = {avatar:"ion-ios-barcode-outline", date: data.batch.vDate, location: data.batch.location, desc:"PICKED UP BY ", owner:data.batch.owner};
 			        	html += '<tr>';
-						html +=	'<td>';
-						html +=	'<div style="font-size: 34px;color:#5596E6;float:right;"><i class="ion-ios-shuffle"></i></div>';
-						html += '</td>';
 						html += '<td style="text-align:left;padding-left:20px">';
 						html +=	'<div style="display: inline-block; vertical-align: middle;">';
 						html += '<p style="font-weight:500;">DELIVERED TO <span style="color:#5596E6">' + txs[i].user +'</span></p>';
@@ -366,9 +520,6 @@ function connect_to_server(){
 			        else if(txs[i].ttype == "INSTALLED"){
 			          //litem = {avatar:"ion-ios-shuffle", date: data.batch.vDate, location: data.batch.location, desc:"DELIVERED TO ", owner:data.batch.owner};
 			        	html += '<tr>';
-						html +=	'<td>';
-						html +=	'<div style="font-size: 34px;color:#5596E6;float:right;"><i class="ion-ios-barcode-outline"></i></div>';
-						html += '</td>';
 						html += '<td style="text-align:left;padding-left:20px">';
 						html +=	'<div style="display: inline-block; vertical-align: middle;">';
 						html += '<p style="font-weight:500;">PART INSTALLED BY <span style="color:#5596E6">' + txs[i].user +'</span></p>';
@@ -379,7 +530,18 @@ function connect_to_server(){
 						html +=	'</div>';
 						html += '</td>';
 						html += '</tr>';
-			        }
+					}
+					else if(txs[i].ttype == "PART_INSTALLED"){
+						html += '<tr>';
+						html += '<td style="text-align:left;padding-left:20px">';
+						html +=	'<div style="display: inline-block; vertical-align: middle;">';
+						html += '<p style="font-weight:500;">PART INSTALLED BY <span style="color:#5596E6">' + txs[i].user +'</span></p>';
+						html += '<p style="">on ' + txs[i].dateOfInstallation +'</p>';
+						html += '<p style="">Vehicle Vin: ' + txs[i].vin +'</p>';
+						html +=	'</div>';
+						html += '</td>';
+						html += '</tr>';
+					}
 				}
 
 				$("#batchDetailsBody").html(html);
@@ -477,7 +639,7 @@ function build_Parts(parts, panelDesc){
 
 		}
 	}
-
+	
 	// Placeholder for an empty table
 	if(html == '' && panelDesc.name === "dashboard") html = '<tr><td>Nothing here...</td></tr>';
 

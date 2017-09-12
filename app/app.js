@@ -49,8 +49,7 @@ var wss = {};
 var start_up_states = {												//app Startup Steps
 	checklist: { state: 'waiting', step: 'step1' },					// Step 1 - check config files for somewhat correctness
 	enrolling: { state: 'waiting', step: 'step2' },					// Step 2 - enroll the admin
-	find_chaincode: { state: 'waiting', step: 'step3' },			// Step 3 - find the chaincode on the channel
-	register_owners: { state: 'waiting', step: 'step4' },			// Step 4 - create the marble owners
+	find_chaincode: { state: 'waiting', step: 'step3' }				// Step 3 - find the chaincode on the channel	
 };
 
 ////////  Pathing and Module Setup  ////////
@@ -60,7 +59,7 @@ app.engine(".html", require("jade").__express);
 app.use(compression());
 app.use(morgan("dev"));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded()); 
+app.use(bodyParser.urlencoded({extended: false })); 
 app.use(parseCookie);
 app.use("/cc/summary", serve_static(path.join(__dirname, "cc_summaries")) );												//for chaincode_parts investigator
 app.use( serve_static(path.join(__dirname, "public"), {maxAge: "1d", setHeaders: setCustomCC}) );							//1 day cache
@@ -168,19 +167,9 @@ if (config_error) {
 		} else {
 			logger.info('Success enrolling admin');
 			broadcast_state('enrolling', 'success');
-
+			startup_unsuccessful();
 			// --- Setup app Library --- //
 			setup_app_lib(function () {
-
-				// --- Check If We have Started app Before --- //
-				detect_prev_startup({ startup: true }, function (err) {
-					if (err) {
-						startup_unsuccessful();
-					} else {
-						logger.debug('Detected that we have launched successfully before');
-						logger.debug('Welcome back - Initiating start up\n\n');
-					}
-				});
 			});
 		}
 	});
@@ -196,30 +185,30 @@ function startup_unsuccessful() {
 }
 
 // Find if app has started up successfully before
-function detect_prev_startup(opts, cb) {
-	logger.info('Checking ledger for marble owners listed in the config file');
-	app_lib.read_everything(null, function (err, resp) {			//read the ledger for marble owners
-		if (err != null) {
-			logger.warn('Error reading ledger');
-			if (cb) cb(true);
-		} else {
-			if (find_missing_owners(resp)) {							//check if each user in the settings file has been created in the ledger
-				logger.info('We need to make marble owners');			//there are marble owners that do not exist!
-				broadcast_state('register_owners', 'waiting');
-				if (cb) cb(true);
-			} else {
-				broadcast_state('register_owners', 'success');			//everything is good
-				process.env.app_first_setup = 'no';
-				logger.info('Everything is in place');
-				if (cb) cb(null);
-			}
-		}
-	});
-}
+//function detect_prev_startup(opts, cb) {
+//	logger.info('Checking ledger for marble owners listed in the config file');
+	// app_lib.read_everything(null, function (err, resp) {			//read the ledger for marble owners
+	// 	if (err != null) {
+	// 		logger.warn('Error reading ledger');
+	// 		if (cb) cb(true);
+	// 	} else {
+	// 		if (find_missing_owners(resp)) {							//check if each user in the settings file has been created in the ledger
+	// 			logger.info('We need to make marble owners');			//there are marble owners that do not exist!
+	// 			broadcast_state('register_owners', 'waiting');
+	// 			if (cb) cb(true);
+	// 		} else {
+	// 			broadcast_state('register_owners', 'success');			//everything is good
+	// 			process.env.app_first_setup = 'no';
+	// 			logger.info('Everything is in place');
+	// 			if (cb) cb(null);
+	// 		}
+	// 	}
+	// });
+//}
 
 //setup app library and check if cc is instantiated
 function setup_app_lib(cb) {
-	var opts = helper.makeMarblesLibOptions();
+	var opts = helper.makeAppLibOptions();
 	app_lib = require('./utils/app_cc_lib.js')(enrollObj, opts, fcw, logger);
 	wsInteraction.setup(wss.broadcast, app_lib);
 
@@ -239,17 +228,6 @@ function setup_app_lib(cb) {
 		}
 		else {													//else we already instantiated
 			console.log('\n----------------------------- Chaincode found on channel "' + helper.getChannelId() + '" -----------------------------\n');
-
-			// --- Check Chaincode Compatibility  --- //
-			// app_lib.check_version(options, function (err, resp) {
-			// 	if (helper.errorWithVersions(resp)) {
-			// 		broadcast_state('find_chaincode', 'failed');
-			// 	} else {
-			// 		logger.info('Chaincode version is good');
-			// 		broadcast_state('find_chaincode', 'success');
-			// 		if (cb) cb(null);
-			// 	}
-			// });
 		}
 	});
 }
@@ -331,11 +309,6 @@ function setupWebSocket() {
 					enroll_admin(1, function (e) {
 						if (e == null) {
 							setup_app_lib(function () {
-								detect_prev_startup({ startup: false }, function (err) {
-									if (err) {
-										create_assets(helper.getMarbleUsernames()); 	//builds app, then starts webapp
-									}
-								});
 							});
 						}
 					});
@@ -347,20 +320,10 @@ function setupWebSocket() {
 					enroll_admin(1, function (e) {										//re-enroll b/c we may be using new peer/order urls
 						if (e == null) {
 							setup_app_lib(function () {
-								detect_prev_startup({ startup: true }, function (err) {
-									if (err) {
-										create_assets(helper.getMarbleUsernames()); 	//builds app, then starts webapp
-									}
-								});
 							});
 						}
 					});
-				}
-
-				//register marble owners
-				else if (data.configure === 'register') {
-					create_assets(data.build_marble_owners);
-				}
+				}				
 			}
 			else if (data) {
 				parseCookie(ws.upgradeReq, null, function(err) {
@@ -393,163 +356,3 @@ function setupWebSocket() {
 		});
 	};
 }
-
-/*
-var wsInteraction = require("./utils/wsInteraction");
-var ws = require("ws");
-
-var Ibc1 = require("ibm-blockchain-js");
-var ibc = new Ibc1();
-
-// ==================================
-// load peers manually or from VCAP, VCAP will overwrite hardcoded list!
-// ==================================
-var manual = JSON.parse(fs.readFileSync(__dirname + "/data.json", "utf8"));
-
-
-var peers = manual.credentials.peers;
-console.log("loading hardcoded peers");
-var users = manual.credentials.user;																		//users are only found if security is on
-if(manual.credentials.users) users = manual.credentials.users;
-console.log("loading hardcoded users");
-
-if(process.env.VCAP_SERVICES){															//load from vcap, search for service, 1 of the 3 should be found...
-	var servicesObject = JSON.parse(process.env.VCAP_SERVICES);
-	for(var i in servicesObject){
-		if(i.indexOf("ibm-blockchain") >= 0){											//looks close enough
-			if(servicesObject[i][0].credentials.error){
-				console.log("!\n!\n! Error from Bluemix: \n", servicesObject[i][0].credentials.error, "!\n!\n");
-				peers = null;
-				users = null;
-				process.error = {type: "network", msg: "Due to overwhelming demand the IBM Blockchain Network service is at maximum capacity.  Please try recreating this service at a later date."};
-			}
-			if(servicesObject[i][0].credentials && servicesObject[i][0].credentials.peers){
-				console.log("overwritting peers, loading from a vcap service: ", i);
-				peers = servicesObject[i][0].credentials.peers;
-				if(servicesObject[i][0].credentials.users){
-					console.log("overwritting users, loading from a vcap service: ", i);
-					users = servicesObject[i][0].credentials.users;
-				} 
-				else users = null;														//no security
-				break;
-			}
-		}
-	}
-}
-
-
-// ==================================
-// configure ibm-blockchain-js sdk
-// ==================================
-
-var options = JSON.parse(fs.readFileSync(__dirname + "/options.json", "utf8"));
-options.network.peers = peers;
-options.network.users = users;
-
-ibc.switchPeer(0);
-ibc.load(options, function(err,data){
-
-	if(err){
-		console.log("Error : ", err);
-	}else{
-		data.details.deployed_name = options.chaincode.deployed_name;
-		cb_ready(err,data);
-	}
-});																//parse/load chaincode
-
-var chaincode = {};
-
-function cb_ready(err, cc){																	//response has chaincode functions
-	if(err){
-		console.log("! looks like an error loading the chaincode, app will fail\n", err);
-		if(!process.error) process.error = {type: "load", msg: err.details};				//if it already exist, keep the last error
-	}
-	else{
-		chaincode = cc;
-		console.log(chaincode);
-		wsInteraction.setup(ibc, cc);
-		router.setup(ibc, cc);
-		
-		console.log("cc.details.deployed_name"+ cc.details.deployed_name);
-
-		if(!cc.details.deployed_name || cc.details.deployed_name === ""){												//decide if i need to deploy
-			cc.deploy("init", [], {save_path: "./cc_summaries", delay_ms: 60000}, cb_deployed);
-		}
-		else{
-			console.log("chaincode summary file indicates chaincode has been previously deployed");
-			cb_deployed();
-		}
-	}
-}
-
-app.use("/", router);
-// ============================================================================================================================
-// 												WebSocket Communication Madness
-// ============================================================================================================================
-function cb_deployed(e, d){
-	if(e != null){
-		console.log("! looks like a deploy error, holding off on the starting the socket\n", e);
-		if(!process.error) process.error = {type: "deploy", msg: e.details};
-	}
-	else{
-		console.log("------------------------------------------ Websocket Up ------------------------------------------");
-		//ibc.save(__dirname + "/cc_summaries");															//save it here for chaincode investigator
-		var wss = new ws.Server({server : server});												//start the websocket now
-		
-		//var wss = new ws.Server({ port: 80 });
- 
-		
-		wss.on("connection", function connection(ws) {
-			ws.on("message", function incoming(message) {
-				console.log("received ws msg:", message);
-				var data = JSON.parse(message);
-				//var finInst = null
-				parseCookie(ws.upgradeReq, null, function(err) {
-			        var sessionID = ws.upgradeReq.signedCookies["connect.sid"];
-			        sessionStore.get(sessionID, function(err, sess) {
-				    	if(sess){
-				    		wsInteraction.process_msg(ws, data, sess.username);
-				    	}
-				    });
-			    }); 
-			});
-			
-			ws.on("close", function(){});
-		});
-		
-		wss.broadcast = function broadcast(data) {											//send to all connections
-			wss.clients.forEach(function each(client) {
-				console.log("client : ", client);
-				try{
-					data.v = "2";
-					client.send(JSON.stringify(data));
-				}
-				catch(e){
-					console.log("error broadcast ws", e);
-				}
-			});
-		};
-		
-		// ========================================================
-		// Part 2 Code - Monitor the height of the blockchain
-		// =======================================================
-		ibc.monitor_blockheight(function(chain_stats){										//there is a new block, lets refresh everything that has a state
-
-			if(chain_stats && chain_stats.height){
-				console.log("hey new block, lets refresh and broadcast to all");
-				ibc.block_stats(chain_stats.height - 1, cb_blockstats);
-				wss.broadcast({msg: "reset"});
-			}
-			
-			//got the block's stats, lets send the statistics
-			function cb_blockstats(e, stats){
-				if(chain_stats.height) stats.height = chain_stats.height - 1;
-				wss.broadcast({msg: "chainstats", e: e, chainstats: chain_stats, blockstats: stats});
-			}
-			
-
-		});
-	}
-}
-
-*/

@@ -5,7 +5,7 @@
 	#innerWrap
 		
 		form(action="/newPart" method="POST")#newPartform
-			table#createPartTable(style="width:50%;float:left")
+			table#createPartTable(style="width:50%;float:left;margin-bottom:100px;")
 				tr
 					td
 						h5 Part Id:
@@ -14,10 +14,28 @@
 							input(type="text" name="PartId" placeholder="Part Id")
 				tr
 					td
-						h5 Product Code:
+						h5 Part Code:
 					td
 						legend 
-							input(type="text" name="ProductCode" placeholder="Product Code")
+							input(type="text" name="PartCode" placeholder="Part Code")
+				tr
+					td
+						h5 Part Type:
+					td
+						legend 
+							select#allPartTypes(name="allPartTypes")
+				tr
+					td
+						h5 Part Name:
+					td
+						legend 
+							select#allPartNames(name="allPartNames")
+				tr
+					td
+						h5 Description:
+					td
+						legend 
+							textarea#partDescription(style="margin-left: 7px;height:45px;border:1px solid #D4DCDC;width:300px;")
 				tr
 					td
 						h5 Date Of Manufacture:

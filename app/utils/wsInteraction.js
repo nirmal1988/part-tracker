@@ -67,16 +67,65 @@ module.exports.getAllParts = function(){
 		});
 };
 
+module.exports.getPart = function(partId){
+	var options = {
+		peer_urls: [helper.getPeersUrl(first_peer)],		
+		endorsed_hook: endorse_hook,
+		ordered_hook: orderer_hook
+	};
+	options.args = {
+		partId: partId
+	};
+	return new Promise(
+        function (resolve, reject) {
+			app_cc_lib.getPart(options, function (err, resp) {
+				if (err != null) reject(err);
+				else {
+					resolve(resp.parsed);
+				}
+			});			
+		});
+};
+
+module.exports.updatePartDetails = function(part){
+	var options = {
+		peer_urls: [helper.getPeersUrl(first_peer)],		
+		endorsed_hook: endorse_hook,
+		ordered_hook: orderer_hook
+	};
+	options.args = {
+		partId: part.partId, 
+		vehicleId: part.vehicleId, 
+		dateOfDelivery: part.dateOfDelivery, 
+		dateOfInstallation: part.dateOfInstallation, 
+		owner: part.owner, 
+		warrantyStartDate: part.warrantyStartDate, 
+		warrantyEndDate: part.warrantyEndDate, 
+		ttype: part.tranType,
+		vin: part.vin
+	};
+	
+	return new Promise(
+        function (resolve, reject) {
+			app_cc_lib.updatePart(options, function (err, resp) {
+				if (err != null) reject(err);
+				else {
+					resolve("true");
+				}
+			});			
+		});
+};
+
 // endorsement stage callback
 function endorse_hook(err) {
 	if (err) sendMsg({ msg: 'tx_step', state: 'endorsing_failed' });
-	else sendMsg({ msg: 'tx_step', state: 'ordering' });
+	//else sendMsg({ msg: 'tx_step', state: 'ordering' });
 }
 
 // ordering stage callback
 function orderer_hook(err) {
 	if (err) sendMsg({ msg: 'tx_step', state: 'ordering_failed' });
-	else sendMsg({ msg: 'tx_step', state: 'committing' });
+	//else sendMsg({ msg: 'tx_step', state: 'committing' });
 }
 
 const channel = helper.getChannelId();
@@ -98,12 +147,14 @@ module.exports.process_msg = function(ws, data, owner){
 		console.log("Create Part ", data, owner);
 		if(data.part){
 			console.log('Part manufacture date:'+data.part.dateOfManufacture);
-			//chaincode.invoke.createPart([data.part.partId, data.part.productCode, data.part.dateOfManufacture, owner], cb_invoked_createpart);				//create a new paper
 			options.args = {
 				partId: data.part.partId, 
-				productCode: data.part.productCode, 
+				partCode: data.part.partCode, 
 				dateOfManufacture: data.part.dateOfManufacture, 
-				owner: owner
+				owner: owner,
+				partType: data.part.partType,
+				partName: data.part.partName,
+				description: data.part.description
 			};
 			app_cc_lib.createPart(options, function (err, resp) {
 				if (err != null) send_err(err, data);
@@ -112,7 +163,6 @@ module.exports.process_msg = function(ws, data, owner){
 					partId: data.part.partId,
 					state: 'finished' 
 					}));
-					//sendMsg({msg: "partCreated", partId: data.part.id});
 				}
 			});
 		}
@@ -120,7 +170,6 @@ module.exports.process_msg = function(ws, data, owner){
 	else if(data.type == "updatePart"){
 		console.log("Update Part ", data, owner);
 		if(data.part){
-			//chaincode.invoke.updatePart([data.part.partId, data.part.vehicleId, data.part.dateOfDelivery, data.part.dateOfInstallation, owner, data.part.warrantyStartDate, data.part.warrantyEndDate, data.part.tranType], cb_invoked_updatepart);	//update part details
 			options.args = {
 				partId: data.part.partId, 
 				vehicleId: data.part.vehicleId, 
@@ -129,7 +178,8 @@ module.exports.process_msg = function(ws, data, owner){
 				owner: owner, 
 				warrantyStartDate: data.part.warrantyStartDate, 
 				warrantyEndDate: data.part.warrantyEndDate, 
-				ttype: data.part.tranType
+				ttype: data.part.tranType,
+				vin: data.part.vin
 			};
 			app_cc_lib.updatePart(options, function (err, resp) {
 				if (err != null) send_err(err, data);
@@ -138,14 +188,12 @@ module.exports.process_msg = function(ws, data, owner){
 					partId: data.part.partId,
 					state: 'finished' 
 					}));
-					//sendMsg({msg: "partUpdated", partId: data.part.id});
 				}
 			});
 		}		
 	}
 	else if(data.type == "getPart"){
 		console.log("Get Part", data.partId);
-		//chaincode.invoke.getPart([data.partId], cb_got_part);
 		options.args = {
 			partId: data.partId
 		};
@@ -156,13 +204,11 @@ module.exports.process_msg = function(ws, data, owner){
 				part: resp.parsed,
 				state: 'finished' 
 				}));
-				//sendMsg({msg: "part", part: JSON.parse(part)});
 			}
 		});
 	}
 	else if(data.type == "getAllParts"){
 		console.log("Get All Parts", owner);
-		//chaincode.invoke.getAllParts([""], cb_got_allparts);
 		app_cc_lib.getAllParts(options, function (err, resp) {
 			if (err != null) send_err(err, data);
 			else {
@@ -170,53 +216,10 @@ module.exports.process_msg = function(ws, data, owner){
 				parts: resp.parsed.parts,
 				state: 'finished' 
 				}));
-				//sendMsg({msg: "allParts", parts: JSON.parse(allParts).parts});
 			}
 		});
 	}
 
-	
-	function cb_got_part(e, part){
-		if(e != null){
-			console.log("Get Part error", e);
-		}
-		else{
-			sendMsg({msg: "part", part: JSON.parse(part)});
-		}
-	}
-	
-	function cb_got_allparts(e, allParts){
-		if(e != null){
-			console.log("Get All Parts error", e);
-		}
-		else{
-			sendMsg({msg: "allParts", parts: JSON.parse(allParts).parts});
-		}
-	}
-
-	function cb_invoked_createpart(e, a){
-		console.log("response: ", e, a);
-		if(e != null){
-			console.log("Invoked create part error", e);
-		}
-		else{
-			console.log("part ID #" + data.part.id)
-			sendMsg({msg: "partCreated", partId: data.part.id});
-		}
-		
-
-	}
-	function cb_invoked_updatepart(e, a){
-		console.log("response: ", e, a);
-		if(e != null){
-			console.log("Invoked update part error", e);
-		}
-		else{
-			console.log("part ID #" + data.part.id)
-			sendMsg({msg: "partUpdated", partId: data.part.id});
-		}
-	}
-	
 	//call back for getting a block's stats, lets send the chain/block stats
 	function cb_blockstats(e, stats){
 		if(chain_stats.height) stats.height = chain_stats.height - 1;

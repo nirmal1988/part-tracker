@@ -32,7 +32,7 @@ fcw.enrollWithAdminCert(helper.makeEnrollmentOptionsUsingCert(0), function (enro
 		const first_peer = helper.getFirstPeerName(channel);
 		var opts = {
 			peer_urls: [helper.getPeersUrl(first_peer)],
-			path_2_chaincode: 'cc',										//same path used to install it
+			path_2_chaincode: 'parts',										//same path used to install it
 			channel_id: helper.getChannelId(),									//same ID used that was used in PREVIOUS instantiate
 			chaincode_id: helper.getChaincodeId(),								//same ID used that was used in PREVIOUS instantiate
 			chaincode_version: helper.getChaincodeVersion(),

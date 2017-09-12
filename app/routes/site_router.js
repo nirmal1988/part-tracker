@@ -45,39 +45,25 @@ enrollUser();
 // ============================================================================================================================
 router.route("/").get(function(req, res){
 	check_login(res, req);
-	res.render("part2", {title: "Vehicle Manager", bag: {setup: setup, e: process.error, session: req.session}} );
+	res.render("part2", {title: "Part Manager", bag: {setup: setup, e: process.error, session: req.session}} );
 });
 
 router.route("/home").get(function(req, res){
 	check_login(res, req);
-	res.render("part2", {title: "Vehicle Manager", bag: {setup: setup, e: process.error, session: req.session}} );
+	res.render("part2", {title: "Part Manager", bag: {setup: setup, e: process.error, session: req.session}} );
 });
 router.route("/part").get(function(req, res){
 	check_login(res, req);
-	res.render("part2", {title: "Vehicle Manager", bag: {setup: setup, e: process.error, session: req.session}} );
+	res.render("part2", {title: "Part Manager", bag: {setup: setup, e: process.error, session: req.session}} );
 });
 router.route("/updatePart").get(function(req, res){
 	check_login(res, req);
-	res.render("part2", {title: "Vehicle Manager", bag: {setup: setup, e: process.error, session: req.session}} );
+	res.render("part2", {title: "Part Manager", bag: {setup: setup, e: process.error, session: req.session}} );
 });
 router.route("/dashboard").get(function(req, res){
 	check_login(res, req);
-	res.render("part2", {title: "Vehicle Manager", bag: {setup: setup, e: process.error, session: req.session}} );
+	res.render("part2", {title: "Part Manager", bag: {setup: setup, e: process.error, session: req.session}} );
 });
-
-router.route("/getPart").post(function(req, res){
-
-	chaincode.query.getPart([req.body.partId], function (e, part){
-		if(e != null){
-			console.log("Get Part error", e);
-			res.send(e);
-		}
-		else{
-			res.send(part);
-		}
-	})
-});
-
 
 router.route("/getAllParts").get(function(req, res){
 	var promise = wsInteraction.getAllParts();
@@ -85,6 +71,21 @@ router.route("/getAllParts").get(function(req, res){
 		res.send(resp);
 	});	
 });
+
+router.route("/getPart/:partId").get(function(req, res){
+	var promise = wsInteraction.getPart(req.params.partId);
+	promise.then(function(resp,err){
+		res.send(resp);
+	});	
+});
+
+router.route("/updatePartDetails").post(function(req, res){
+	var promise = wsInteraction.updatePartDetails(req.body);
+	promise.then(function(resp,err){
+		res.send(resp);
+	});	
+});
+
 
 router.route("/login").get(function(req, res){
 	res.render("login", {title: "Login", bag: {setup: setup, e: process.error, session: req.session}} );

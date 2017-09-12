@@ -476,7 +476,8 @@ a:visited {
 #innerWrap {
     width: 800px;
     margin: 50px auto auto;
-    text-align: right
+    text-align: right;
+    margin-top: 0px;
 }
 #innerWrapTag {
     text-align: center;
