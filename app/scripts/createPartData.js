@@ -358,7 +358,6 @@ var partData = [
 		description: "MW Ignition Coil Kit (Set of 6)"
 	}
 ];
-
 var _o = 0;
 insertData();	
 function insertData(){	
