@@ -368,13 +368,13 @@ function insertData(){
 	}
 	opts.cc_args = [
 		partData[_o].partId, 
-		partData[_o].partCode,
-		//partData[_o].batchCode,
+		partData[_o].partCode,		
 		partData[_o].dateOfManufacturer,
 		partData[_o].user,
 		partData[_o].partType,
 		partData[_o].partName,
-		partData[_o].description
+		partData[_o].description,
+		partData[_o].batchCode
 	];	
 	fcw.invoke_chaincode(enrollResp, opts, function (err, resp) {
 		_o++;
@@ -382,15 +382,6 @@ function insertData(){
 		insertData();
 	});	
 }
-
-
-
-
-		// fcw.instantiate_chaincode(enrollResp, opts, function (err, resp) {
-		// 	console.log('---------------------------------------');
-		// 	logger.info('Instantiate done. Errors:', (!err) ? 'nope' : err);
-		// 	console.log('---------------------------------------');
-		// });
 	}
 
 
