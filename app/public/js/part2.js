@@ -201,13 +201,14 @@ $(document).on('ready', function() {
 		}
 
 	}
-
-	$("#allPartTypes").empty().append('<option id=""></option>')
-	for(var i in partTypes){
-		$("#allPartTypes").append('<option id="'+ partTypes[i] +'">'+ partTypes[i] +'</option>');
+	bindPartType();
+	function bindPartType(){
+		$("#allPartTypes").empty().append('<option id=""></option>')
+		for(var i in partTypes){
+			$("#allPartTypes").append('<option id="'+ partTypes[i] +'">'+ partTypes[i] +'</option>');
+		}
+		$("#allPartTypes").change();
 	}
-	$("#allPartTypes").change();
-
 	$("#allPartTypes").change(function(){
 		console.log('allPartTypes dropdown change');
 
@@ -245,7 +246,8 @@ $(document).on('ready', function() {
 								dateOfManufacture: $("input[name='DateOfManufacture']").val(),
 								partType: $('#allPartTypes').val(),
 								partName: $("#allPartNames").val(),
-								description: $("#partDescription").val()
+								description: $("#partDescription").val(),
+								batchCode: $("#batchCode").val()
 							}
 						};
 
@@ -261,7 +263,10 @@ $(document).on('ready', function() {
 					//$("#batchTagPanel").show();
 					$("input[name='PartId']").val('');
 					$("input[name='PartCode']").val(''),
-					$("input[name='DateOfManufacture']").val('')
+					$("input[name='DateOfManufacture']").val('');
+					$("#partDescription").val("");
+					$("#batchCode").val("");
+					bindPartType();
 					//$("#submit").prop('disabled', true);
 				} else {
 					//alert('Part with id '+obj.part.partId+' already exists.');
@@ -498,6 +503,7 @@ function connect_to_server(){
 						html += '<p style="font-weight:500;">ADDED BY <span style="color:#5596E6">' + txs[i].user +'</span></p>';
 						html += '<p style="">on ' + txs[i].dateOfManufacture +'</p>';
 						html += '<p style="">Part Code: ' + data.part.partCode +'</p>';
+						html += '<p style="">Batch Code: ' + data.part.batchCode +'</p>';
 						html += '<p style="">Part Type: ' + data.part.partType +'</p>';
 						html += '<p style="">Part Name: ' + data.part.partName +'</p>';
 						html += '<p style="">Description: ' + data.part.description +'</p>';

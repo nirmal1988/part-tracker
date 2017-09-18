@@ -45,6 +45,7 @@ type SimpleChaincode struct {
 type Part struct {
 	PartId 			string 	`json:"partId"`
 	PartCode 		string  `json:"partCode"`
+	BatchCode 		string  `json:"batchCode"`
 	PartType 		string  `json:"partType"`
 	PartName 		string  `json:"partName"`
 	Description 		string  `json:"description"`
@@ -69,6 +70,10 @@ type Transaction struct {
 //==============================================================================================================================
 type AllParts struct{
 	Parts []string `json:"parts"`
+}
+
+type AllPartDetails struct{
+	Parts []Part `json:"parts"`
 }
 
 // Part tracker end
@@ -139,7 +144,9 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return createPart(stub, args)	
 	} else if function == "updatePart" {			//create a part
 		return updatePart(stub, args)	
-	} 
+	} else if function == "getAllPartDetails" {			//create a part
+		return getAllPartDetails(stub, args[0],args[1])	
+	}
 
 	// error out
 	fmt.Println("Received unknown invoke function name - " + function)

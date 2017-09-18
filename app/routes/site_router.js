@@ -79,6 +79,13 @@ router.route("/getPart/:partId").get(function(req, res){
 	});	
 });
 
+router.route("/getAllPartDetails/:filter/:filterValue").get(function(req, res){
+	var promise = wsInteraction.getAllPartDetails(req.params.filter, req.params.filterValue);
+	promise.then(function(resp,err){
+		res.send(resp);
+	});	
+});
+
 router.route("/updatePartDetails").post(function(req, res){
 	var promise = wsInteraction.updatePartDetails(req.body);
 	promise.then(function(resp,err){

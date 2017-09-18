@@ -24,7 +24,7 @@
 				}
 			},
 			"chaincodes": {
-				"parts": "v5.4"
+				"parts": "v6.1"
 			},
 			"x-blockDelay": 10000
 		}

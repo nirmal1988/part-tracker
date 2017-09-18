@@ -67,6 +67,27 @@ module.exports.getAllParts = function(){
 		});
 };
 
+module.exports.getAllPartDetails = function(filter, filterValue){
+	var options = {
+		peer_urls: [helper.getPeersUrl(first_peer)],		
+		endorsed_hook: endorse_hook,
+		ordered_hook: orderer_hook
+	};
+	options.args = {
+		filter: filter,
+		filterValue: filterValue
+	};
+	return new Promise(
+        function (resolve, reject) {
+			app_cc_lib.getAllPartDetails(options, function (err, resp) {
+				if (err != null) reject(err);
+				else {
+					resolve({parts: resp.parsed.parts});
+				}
+			});			
+		});
+};
+
 module.exports.getPart = function(partId){
 	var options = {
 		peer_urls: [helper.getPeersUrl(first_peer)],		
@@ -154,7 +175,8 @@ module.exports.process_msg = function(ws, data, owner){
 				owner: owner,
 				partType: data.part.partType,
 				partName: data.part.partName,
-				description: data.part.description
+				description: data.part.description,
+				batchCode: data.part.batchCode
 			};
 			app_cc_lib.createPart(options, function (err, resp) {
 				if (err != null) send_err(err, data);

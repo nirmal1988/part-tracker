@@ -32,9 +32,9 @@ func createPart(stub  shim.ChaincodeStubInterface, args []string) pb.Response {
 	var err error
 	fmt.Println("Running createPart")
 
-	if len(args) != 7 {
-		fmt.Println("Incorrect number of arguments. Expecting 7 - PartId, Part Code, Manufacture Date, User, Part Type, Part Name, Description")
-		return shim.Error("Incorrect number of arguments. Expecting 7")
+	if len(args) != 8 {
+		fmt.Println("Incorrect number of arguments. Expecting 8 - PartId, Part Code, Manufacture Date, User, Part Type, Part Name, Description, Batch Code")
+		return shim.Error("Incorrect number of arguments. Expecting 8")
 	}
 
 	fmt.Println("Arguments :"+args[0]+","+args[1]+","+args[2]+","+args[3]+","+args[4]+","+args[5]+","+args[6]);
@@ -45,6 +45,7 @@ func createPart(stub  shim.ChaincodeStubInterface, args []string) pb.Response {
 	bt.PartType			= args[4]
 	bt.PartName			= args[5]
 	bt.Description			= args[6]
+	bt.BatchCode			= args[7]
 	var tx Transaction
 	tx.DateOfManufacture		= args[2]
 	tx.TType 			= "CREATE"

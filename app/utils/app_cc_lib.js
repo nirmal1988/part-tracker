@@ -87,7 +87,8 @@ module.exports = function (enrollObj, g_options, fcw, logger) {
 				options.args.owner,
 				options.args.partType,
 				options.args.partName,
-				options.args.description
+				options.args.description,
+				options.args.batchCode
 			],
 		};
 		fcw.invoke_chaincode(enrollObj, opts, cb);
@@ -151,6 +152,21 @@ module.exports = function (enrollObj, g_options, fcw, logger) {
 			chaincode_id: g_options.chaincode_id,
 			cc_function: 'getAllParts',
 			cc_args: [""]
+		};
+		fcw.query_chaincode(enrollObj, opts, cb);
+	};
+
+	app_chainCode.getAllPartDetails = function (options, cb) {
+		logger.info('fetching all part details');
+
+		var opts = {
+			peer_urls: g_options.peer_urls,
+			peer_tls_opts: g_options.peer_tls_opts,
+			channel_id: g_options.channel_id,
+			chaincode_version: g_options.chaincode_version,
+			chaincode_id: g_options.chaincode_id,
+			cc_function: 'getAllPartDetails',
+			cc_args: [options.args.filter, options.args.filterValue]
 		};
 		fcw.query_chaincode(enrollObj, opts, cb);
 	};
