@@ -157,6 +157,10 @@ func getAllPartDetails(stub  shim.ChaincodeStubInterface, filter string, filterV
 
 		if strings.ToLower(filter) == "all"{
 			rab.Parts = append(rab.Parts,sb);
+		} else if strings.ToLower(filter) == "partid" {
+			if strings.ToLower(sb.PartId) == strings.ToLower(filterValue) {
+				rab.Parts = append(rab.Parts,sb);
+			}
 		} else if strings.ToLower(filter) == "batchcode" {
 			if strings.ToLower(sb.BatchCode) == strings.ToLower(filterValue) {
 				rab.Parts = append(rab.Parts,sb);
@@ -172,7 +176,7 @@ func getAllPartDetails(stub  shim.ChaincodeStubInterface, filter string, filterV
 		} else if strings.ToLower(filter) == "vin" {
 			if strings.ToLower(filterValue) == "all" {
 				for j := range sb.Transactions{
-					if sb.Transactions[j].Vin != "" && len(sb.Transactions[j].Vin) > 4 {
+					if sb.Transactions[j].Vin != "" && len(sb.Transactions[j].Vin) > 1 {
 						rab.Parts = append(rab.Parts,sb);
 					}
 				}

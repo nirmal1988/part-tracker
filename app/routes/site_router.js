@@ -56,6 +56,11 @@ router.route("/part").get(function(req, res){
 	check_login(res, req);
 	res.render("part2", {title: "Part Manager", bag: {setup: setup, e: process.error, session: req.session}} );
 });
+router.route("/trackPart").get(function(req, res){
+	check_login(res, req);
+	res.render("trackPart", {title: "Part Manager", bag: {setup: setup, e: process.error, session: req.session}} );
+});
+
 router.route("/updatePart").get(function(req, res){
 	check_login(res, req);
 	res.render("part2", {title: "Part Manager", bag: {setup: setup, e: process.error, session: req.session}} );

@@ -7,9 +7,11 @@
 	// ie: clicking <div class="nav">HOME</div> will show panel #homePanel
 	// this code is in layout.jade
 	//.nav#homeLink HOME
-	.nav#newPartLink(style="font-weight: 300;")  NEW PART
-	.nav#updatePartLink(style="font-weight: 300;")  UPDATE PART
-	.nav#dashboardLink(style="font-weight: 300;") DASHBOARD
+	.nav#newPartLink(style="font-weight: 300;")  New Part
+	.nav#updatePartLink(style="font-weight: 300;")  Update Part
+	//- .nav#dashboardLink(style="font-weight: 300;") Dashboard
+	a.nav#dashboardLink(style="font-weight: 300;text-decoration: none;" href="dashboard") Dashboard
+	a.nav#trackPartLink(style="font-weight: 300;text-decoration: none;" href="trackpart") Track Part
 	
 #whoAmI
 	span.fa.fa-user#userIcon

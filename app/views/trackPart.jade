@@ -1,0 +1,30 @@
+extends ./template/layout.jade
+	
+	
+// --------------- Header -------------- //
+block custom_header
+	script(src='/js/part2.js')
+	script(src='/js/blockchain.js')
+	script(type='text/javascript').
+		$(document).ready(function(){
+			$("#contentTable").css("height",$("#dashboardTable").height() + 125);	
+		});
+		
+		
+// --------------- Navigation Bar  -------------- //
+block navpanel
+	include ./template/navigation.jade
+	
+	
+// --------------- Main Stuff  -------------- //
+block content
+	#contentPanel
+		
+		#blockdate(title="date of last block") loading...
+		
+		// --------------- filter
+		include ./trackPartFilter.jade
+
+		
+block footer
+	include ./template/blockchain.jade

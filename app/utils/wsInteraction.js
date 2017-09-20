@@ -241,6 +241,21 @@ module.exports.process_msg = function(ws, data, owner){
 			}
 		});
 	}
+	else if(data.type == "getAllPartDetails"){		
+		options.args = {
+			filter: data.filter,
+			filterValue: data.filterValue
+		};
+		app_cc_lib.getAllPartDetails(options, function (err, resp) {
+			if (err != null) reject(err);
+			else {
+				options.ws.send(JSON.stringify({ msg: 'getAllPartDetails', 
+				parts: resp.parsed.parts,
+				state: 'finished' 
+				}));
+			}
+		});			
+	}
 
 	//call back for getting a block's stats, lets send the chain/block stats
 	function cb_blockstats(e, stats){

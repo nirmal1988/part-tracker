@@ -193,6 +193,7 @@ $(document).on('ready', function() {
 		
 		else if(user.username) {
 			$("#newPartLink").show();
+			$("#trackPartLink").show();
 			$("#newPartPanel").hide();
 			$("#dashboardLink").show();
 			$("#updatePartLink").hide();
@@ -410,6 +411,15 @@ $(document).on('ready', function() {
 	    ws.send(JSON.stringify({type: "getPart", partId: bId}));
 	});
 
+	$("#allFilter").append('<option value="all">All</option>');
+	$("#allFilter").append('<option value="partid">Part Id</option>');
+	$("#allFilter").append('<option value="batchcode">Batch Code</option>');
+	$("#allFilter").append('<option value="partcode">Part Code</option>');
+	$("#allFilter").append('<option value="vin">VIN</option>');
+	$("#filterParts").click(function(){
+		ws.send(JSON.stringify({type: "getAllPartDetails", filter: $("#allFilter").val(), filterValue: $("#filterValue").val()==""?"all":$("#filterValue").val() }));
+	});
+
 });
 
 
@@ -484,6 +494,29 @@ function connect_to_server(){
 				build_Parts(data.parts, null);
 				$('#spinner2').hide();
 				$('#openTrades').show();
+			}
+			else if(data.msg === 'getAllPartDetails'){
+				console.log("---- all filtered Parts ---- ", data);
+				var html ="";
+				html += "<table>";
+				html += "<tr><th>Part Id</th><th>Part Code</th><th>Batch Code</th><th>VIN</th><th>Part Type</th><th>Part Name</th></tr>";
+				$(data.parts).each(function(i){
+					var vin = "";
+					$(data.parts[i].transactions).each(function(j){
+						if(data.parts[i].transactions[j].vin != "")
+							vin = data.parts[i].transactions[j].vin;
+					});
+					html += "<tr>";
+					html += "<td>"+ data.parts[i].partId +"</td>";
+					html += "<td>"+ data.parts[i].partCode +"</td>";
+					html += "<td>"+ data.parts[i].batchCode +"</td>";
+					html += "<td>"+ vin +"</td>";
+					html += "<td>"+ data.parts[i].partType +"</td>";
+					html += "<td>"+ data.parts[i].partName +"</td>";
+					html += "</tr>";
+				});
+				html += "</table>";
+				$("#divFilteredData").html(html);
 			}
 			else if(data.msg === 'part'){
 				console.log('onMessage part:'+data.part);
