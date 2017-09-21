@@ -1,5 +1,6 @@
 var winston = require('winston');								//logger module
 var path = require('path');
+var QRCode = require('qrcode');
 
 // --- Set Our Things --- //
 var logger = new (winston.Logger)({
@@ -366,20 +367,24 @@ function insertData(){
 		console.log("insert complete");
 		return;
 	}
-	opts.cc_args = [
-		partData[_o].partId, 
-		partData[_o].partCode,		
-		partData[_o].dateOfManufacturer,
-		partData[_o].user,
-		partData[_o].partType,
-		partData[_o].partName,
-		partData[_o].description,
-		partData[_o].batchCode
-	];	
-	fcw.invoke_chaincode(enrollResp, opts, function (err, resp) {
-		_o++;
-		logger.info( _o.partId +'done. Errors:', (!err) ? 'nope' : err);
-		insertData();
+	QRCode.toDataURL(partData[_o].partId, { errorCorrectionLevel: 'H' }, function (err, url) {
+		
+		opts.cc_args = [
+			partData[_o].partId, 
+			partData[_o].partCode,		
+			partData[_o].dateOfManufacturer,
+			partData[_o].user,
+			partData[_o].partType,
+			partData[_o].partName,
+			partData[_o].description,
+			partData[_o].batchCode,
+			url
+		];	
+		fcw.invoke_chaincode(enrollResp, opts, function (err, resp) {
+			_o++;
+			logger.info( _o.partId +'done. Errors:', (!err) ? 'nope' : err);
+			insertData();
+		});	
 	});	
 }
 	}

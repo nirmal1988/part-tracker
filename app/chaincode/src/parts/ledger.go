@@ -48,6 +48,7 @@ type Part struct {
 	BatchCode 		string  `json:"batchCode"`
 	PartType 		string  `json:"partType"`
 	PartName 		string  `json:"partName"`
+	QRCode 		string  `json:"qrcode"`
 	Description 		string  `json:"description"`
 	Transactions		[]Transaction `json:"transactions"`
 }

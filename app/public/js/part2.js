@@ -523,6 +523,7 @@ function connect_to_server(){
 				var txs = data.part.transactions;
 				var html = ''
 				$("#batchDetailsTable").show();
+				//$("#qrcodeDetailsBody").html('<img src="'+ data.part.qrcode +'" />');
 				for(var i=0; i<txs.length; i++){
 					console.log("Trnsaction "+i+" "+txs[i]);
 					$("#bDetHeader").html("<p>PART Id: " + data.part.partId + "(" + data.part.partName + ")</p>");
@@ -532,7 +533,7 @@ function connect_to_server(){
 			          //litem = {avatar:"ion-ios-box-outline", date: tx.vDate, location: tx.location, desc:"ADDED BY ", owner:tx.owner};
 				        html += '<tr>';
 						html += '<td style="text-align:left;padding-left:20px">';
-						html +=	'<div style="display: inline-block; vertical-align: middle;">';
+						html +=	'<div style="display: inline-block; vertical-align: middle;width:70%;float:left;">';
 						html += '<p style="font-weight:500;">ADDED BY <span style="color:#5596E6">' + txs[i].user +'</span></p>';
 						html += '<p style="">on ' + txs[i].dateOfManufacture +'</p>';
 						html += '<p style="">Part Code: ' + data.part.partCode +'</p>';
@@ -542,6 +543,7 @@ function connect_to_server(){
 						html += '<p style="">Description: ' + data.part.description +'</p>';
 						
 						html +=	'</div>';
+						html += '<div style="width:30%;float:left;"><img src="'+ data.part.qrcode +'" /></div>';
 						html += '</td>';
 						html += '</tr>';
 			        }

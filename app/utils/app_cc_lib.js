@@ -1,6 +1,7 @@
 //-------------------------------------------------------------------
 // Chaincode Library
 //-------------------------------------------------------------------
+var QRCode = require('qrcode');
 
 module.exports = function (enrollObj, g_options, fcw, logger) {
 	var app_chainCode = {};
@@ -69,29 +70,32 @@ module.exports = function (enrollObj, g_options, fcw, logger) {
 	app_chainCode.createPart = function (options, cb) {
 		console.log('');
 		logger.info('Creating Vehicle...');
-
-		var opts = {
-			peer_urls: g_options.peer_urls,
-			peer_tls_opts: g_options.peer_tls_opts,
-			channel_id: g_options.channel_id,
-			chaincode_id: g_options.chaincode_id,
-			chaincode_version: g_options.chaincode_version,
-			event_url: g_options.event_url,
-			endorsed_hook: options.endorsed_hook,
-			ordered_hook: options.ordered_hook,
-			cc_function: 'createPart',
-			cc_args: [
-				options.args.partId,
-				options.args.partCode,
-				options.args.dateOfManufacture,
-				options.args.owner,
-				options.args.partType,
-				options.args.partName,
-				options.args.description,
-				options.args.batchCode
-			],
-		};
-		fcw.invoke_chaincode(enrollObj, opts, cb);
+		QRCode.toDataURL(options.args.partId, { errorCorrectionLevel: 'H' }, function (err, url) {
+			console.log(url)
+			var opts = {
+				peer_urls: g_options.peer_urls,
+				peer_tls_opts: g_options.peer_tls_opts,
+				channel_id: g_options.channel_id,
+				chaincode_id: g_options.chaincode_id,
+				chaincode_version: g_options.chaincode_version,
+				event_url: g_options.event_url,
+				endorsed_hook: options.endorsed_hook,
+				ordered_hook: options.ordered_hook,
+				cc_function: 'createPart',
+				cc_args: [
+					options.args.partId,
+					options.args.partCode,
+					options.args.dateOfManufacture,
+					options.args.owner,
+					options.args.partType,
+					options.args.partName,
+					options.args.description,
+					options.args.batchCode,
+					url
+				],
+			};
+			fcw.invoke_chaincode(enrollObj, opts, cb);
+		});
 	};
 
 	//update part
