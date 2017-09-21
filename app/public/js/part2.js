@@ -523,17 +523,20 @@ function connect_to_server(){
 				var txs = data.part.transactions;
 				var html = ''
 				$("#batchDetailsTable").show();
-				//$("#qrcodeDetailsBody").html('<img src="'+ data.part.qrcode +'" />');
+
+				$("#bDetHeader").html("<div style='text-align:left;width:10%;float:left;' id='qr-code'></div><div style='width:90%;float:left;vertical-align:bottom;height:64px;font-weight:bold;font-size:17px;text-align:left;'><p style='padding-top:44px;'>PART Id: " + data.part.partId + " (" + data.part.partName + ")</p></div>");
+				$("#qr-code").qrcode({width: 64,height: 64,text: data.part.partId});	
+
 				for(var i=0; i<txs.length; i++){
 					console.log("Trnsaction "+i+" "+txs[i]);
-					$("#bDetHeader").html("<p>PART Id: " + data.part.partId + "(" + data.part.partName + ")</p>");
+					
 
 
 					if(txs[i].ttype == "CREATE"){
 			          //litem = {avatar:"ion-ios-box-outline", date: tx.vDate, location: tx.location, desc:"ADDED BY ", owner:tx.owner};
 				        html += '<tr>';
 						html += '<td style="text-align:left;padding-left:20px">';
-						html +=	'<div style="display: inline-block; vertical-align: middle;width:70%;float:left;">';
+						html +=	'<div style="display: inline-block; vertical-align: middle;width:100%;float:left;">';
 						html += '<p style="font-weight:500;">ADDED BY <span style="color:#5596E6">' + txs[i].user +'</span></p>';
 						html += '<p style="">on ' + txs[i].dateOfManufacture +'</p>';
 						html += '<p style="">Part Code: ' + data.part.partCode +'</p>';
@@ -542,8 +545,7 @@ function connect_to_server(){
 						html += '<p style="">Part Name: ' + data.part.partName +'</p>';
 						html += '<p style="">Description: ' + data.part.description +'</p>';
 						
-						html +=	'</div>';
-						html += '<div style="width:30%;float:left;"><img src="'+ data.part.qrcode +'" /></div>';
+						html +=	'</div>';						
 						html += '</td>';
 						html += '</tr>';
 			        }
@@ -584,7 +586,7 @@ function connect_to_server(){
 						html += '</tr>';
 					}
 				}
-
+				
 				$("#batchDetailsBody").html(html);
 			}
 			else if(data.msg === 'chainstats'){

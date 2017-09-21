@@ -19,14 +19,14 @@
 var cfenv = require('cfenv');
 var appEnv = cfenv.getAppEnv();
 var azureVM_URL = "win10dv31190.cloudapp.net:3000"; //"win10dv35865.cloudapp.net:3000";
-var host =  appEnv.bind;
-//var host =  azureVM_URL; 
+//var host =  appEnv.bind;
+var host =  azureVM_URL; 
 var port = appEnv.port;
 
 var vcap_app = {application_uris: [ appEnv.url.split("//")[1] ]};						//default blank
 //var vcap_app = {application_uris: [host]};						//default blank
-var ext_uri = vcap_app.application_uris[0];
-//var ext_uri = azureVM_URL;
+//var ext_uri = vcap_app.application_uris[0];
+var ext_uri = azureVM_URL;
 
 console.log("appEnv : ", ext_uri, "->", host, ":", port);
 

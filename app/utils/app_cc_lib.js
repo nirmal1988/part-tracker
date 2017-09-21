@@ -70,8 +70,8 @@ module.exports = function (enrollObj, g_options, fcw, logger) {
 	app_chainCode.createPart = function (options, cb) {
 		console.log('');
 		logger.info('Creating Vehicle...');
-		QRCode.toDataURL(options.args.partId, { errorCorrectionLevel: 'H' }, function (err, url) {
-			console.log(url)
+		//QRCode.toDataURL(options.args.partId, { errorCorrectionLevel: 'H' }, function (err, url) {
+			//console.log(url)
 			var opts = {
 				peer_urls: g_options.peer_urls,
 				peer_tls_opts: g_options.peer_tls_opts,
@@ -90,12 +90,11 @@ module.exports = function (enrollObj, g_options, fcw, logger) {
 					options.args.partType,
 					options.args.partName,
 					options.args.description,
-					options.args.batchCode,
-					url
+					options.args.batchCode
 				],
 			};
 			fcw.invoke_chaincode(enrollObj, opts, cb);
-		});
+		//});
 	};
 
 	//update part
